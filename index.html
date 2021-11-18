@@ -1,0 +1,244 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fatch data Assignment!</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+    
+    <h1 style=" width: 80%; margin: 25px auto; font-family: system-ui;color: #0d6efd;">FATCH DATA FROM MongoDB Atlas!</h1>
+
+    <!--  form container -->
+    <div style="margin: 0 auto; width: 80%;">
+       
+        <div class="mb-3 row">
+            <label for="inputStudent_Name" class="col-sm-2 col-form-label">Student Name:</label>
+            <div class="col-sm-10">
+                <input type="text"placeholder="Enter Your Name" class="form-control" id="inputStudent_Name">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="inputFather_Name" class="col-sm-2 col-form-label">Father Name:</label>
+            <div class="col-sm-10">
+                <input type="text"placeholder="Enter Your Father Name" class="form-control" id="inputFather_Name">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="inputEmail" class="col-sm-2 col-form-label">Email:</label>
+            <div class="col-sm-10">
+                <input type="email"placeholder="Enter Your Age" class="form-control" id="inputEmail">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="inputAddress" class="col-sm-2 col-form-label">Address:</label>
+            <div class="col-sm-10">
+                <input type="text"placeholder="Enter Your Address" class="form-control" id="inputAddress">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="inputAge" class="col-sm-2 col-form-label">Age:</label>
+            <div class="col-sm-10">
+                <input type="number"placeholder="Enter Your Age" class="form-control" id="inputAge">
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <label for="inputRoll_No" class="col-sm-2 col-form-label">Roll No:</label>
+            <div class="col-sm-10">
+                <input type="number"placeholder="Enter Your Roll No" class="form-control" id="inputRoll_No">
+            </div>
+        </div>
+
+        <button onclick="createUser()" type="button" class="btn btn-primary">Create Or Add User</button>
+
+        <div id="alert" style="height: 70px;"></div>
+
+    </div>
+
+    <!-- data container -->
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">_id</th>
+                            <th scope="col">Student Name</th>
+                            <th scope="col">Father Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Address</th>
+                            <th scope="col">Age</th>
+                            <th scope="col">Roll No.</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+
+        let users = []
+
+        function createUser() {
+            let student_name = document.getElementById("inputStudent_Name").value
+            let father_name = document.getElementById("inputFather_Name").value
+            let email = document.getElementById("inputEmail").value
+            let address = document.getElementById("inputAddress").value
+            let age = document.getElementById("inputAge").value
+            let roll_no = document.getElementById("inputRoll_No").value
+
+            axios.post('https://mydb-1.herokuapp.com/user', {
+                student_name, father_name, email, address, age, roll_no
+            })
+                .then(function (response) {
+                    console.log(response);
+
+                    document.getElementById("inputStudent_Name").value = ""
+
+                    getAllUser()
+
+                    document.getElementById("alert").innerHTML =
+                        `<div class="alert alert-success" role="alert">
+                            User Created!
+                        </div>`
+
+                    setTimeout(() => {
+                        document.getElementById("alert").innerHTML = ""
+                    }, 4002);
+
+                })
+
+        }
+
+        function getAllUser() {
+
+            axios.get('https://mydb-1.herokuapp.com/users')
+                .then(function (response) {
+                    console.log(response);
+
+                    users = response.data;
+
+                    document.getElementById("tableBody").innerHTML = ""
+
+                    users.map((eachUser, index) => {
+                        document.getElementById("tableBody").innerHTML +=
+                            `<tr id="${eachUser._id}">
+                                <th scope="row">${eachUser._id}</th>
+                                <td>${eachUser.student_name}</td>
+                                <td>${eachUser.father_name}</td>
+                                <td>${eachUser.email}</td>
+                                <td>${eachUser.address}</td>
+                                <td>${eachUser.age}</td>
+                                <td>${eachUser.roll_no}</td>
+                                <td>
+                                    <button type="button" onclick="editUser('${eachUser._id}', ${index})" class="btn btn-primary">Let's Update!</button>
+                                    <button type="button" onclick="deleteUser('${eachUser._id}')" class="btn btn-danger">Wanna Delete!</button>
+                                </td>
+                            </tr>`
+                    })
+                })
+
+        }
+
+        function editUser(_id, index) {
+            console.log(_id, index);
+
+            const userObject = users[index]
+
+            console.log("userObject: ", userObject);
+
+            document.getElementById(_id).innerHTML = `
+            <tr id="${_id}"> 
+                
+                    <th scope="row">${_id}</th>
+                    <td><input type="text" id="${_id}-student_name" value="${userObject.student_name}" /></td>
+                    <td><input type="text" id="${_id}-father_name" value="${userObject.father_name}" /></td>
+                    <td><input type="email" id="${_id}-email" value="${userObject.email}" /></td>
+                    <td><input type="text" id="${_id}-address" value="${userObject.address}" /></td>
+                    <td><input type="text" id="${_id}-age" value="${userObject.age}" /></td>
+                    <td><input type="text" id="${_id}-roll_no" value="${userObject.roll_no}" /></td>
+                    <td>
+                        <button type="button" onclick="updateUser('${_id}')" class="btn btn-success">Update</button>
+                    </td>
+                </tr>`;
+        }
+
+        function deleteUser(_id) {
+
+            axios.delete(`https://mydb-1.herokuapp.com/user/${_id}`)
+                .then(function (response) {
+                    console.log(response);
+
+                    getAllUser();
+
+                    document.getElementById("alert").innerHTML =
+                        `<div class="alert alert-danger" role="alert">
+                            User Deleted Successfully!
+                        </div>`
+
+                    setTimeout(() => {
+                        document.getElementById("alert").innerHTML = ""
+                    }, 4002);
+
+                })
+        }
+
+        function updateUser(_id) {
+
+            const student_name = document.getElementById(`${_id}-student_name`).value
+            const father_name = document.getElementById(`${_id}-father_name`).value
+            const email = document.getElementById(`${_id}-email`).value
+            const address = document.getElementById(`${_id}-address`).value
+            const age = document.getElementById(`${_id}-age`).value
+            const roll_no = document.getElementById(`${_id}-roll_no`).value
+
+            axios.put(`https://mydb-1.herokuapp.com/user/${_id}`, { student_name, father_name, email, address, age, roll_no })
+                .then(function (response) {
+                    console.log(response);
+
+                    getAllUser();
+
+                    document.getElementById("alert").innerHTML =
+                        `<div class="alert alert-success" role="alert">
+                            User Updated Successfully!
+                        </div>`
+
+                    setTimeout(() => {
+                        document.getElementById("alert").innerHTML = ""
+                    }, 4002);
+
+                })
+        }
+
+
+
+        getAllUser();
+
+    </script>
+
+</body>
+
+</html>
